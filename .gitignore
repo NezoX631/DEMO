@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Виртуальные окружения
+venv/
+.venv/
+env/
+ENV/
+
+# Среды разработки
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Сборка и временные файлы
+build/
+dist/
+*.egg-info/
+
+# Локальные настройки и секреты
+config.ini
+.env
+*.log
