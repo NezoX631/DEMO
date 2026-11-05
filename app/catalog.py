@@ -115,7 +115,7 @@ class ProductEditWindow(QWidget):
             else:
                 self.ui.imageLabel.setText("Изображение по умолчанию")
         except:
-            self.ui.imageLabel.setText("Нет фото")
+            self.ui.imageLabel.setText("Изображение товара не найдено в каталоге")
 
     def load_categories(self):
         try:
