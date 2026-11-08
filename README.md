@@ -13,10 +13,11 @@
 
 ## Требования
 - Python 3.10+
-- PostgreSQL 14+
+- PostgreSQL 14+ (локально или в Docker)
+- Docker Desktop с поддержкой WSL 2 и Docker Compose v2 (для контейнерного запуска)
 - Библиотеки из файла requirements.txt
 
-## Установка и запуск
+## Установка и запуск (локальный вариант)
 1. Клонировать репозиторий:
 ```bash
 git clone https://github.com/NezoX631/DEMO.git
@@ -46,11 +47,87 @@ password = your_password
 python main.py
 ```
 
+## Запуск PostgreSQL через Docker Compose
+
+Для изолированного развертывания инфраструктуры базы данных и регламентной проверки доступности СУБД используется Docker Compose.
+
+### 1. Предварительные требования
+- Установленный и запущенный Docker Desktop в режиме Linux containers;
+- Наличие плагина Docker Compose версии v2.
+
+### 2. Настройка переменных окружения
+Скопировать файл-шаблон `.env.example` в локальный файл `.env` и задать собственный пароль:
+```bash
+cp .env.example .env
+```
+Пример содержимого `.env`:
+```text
+POSTGRES_DB=shoe_store
+POSTGRES_USER=shoe_user
+POSTGRES_PASSWORD=your_secure_password
+POSTGRES_HOST_PORT=5433
+```
+Файл `.env` включен в `.gitignore` и не передается в систему контроля версий.
+
+### 3. Запуск контейнерного стека
+Запустить службы базы данных `db` и вспомогательного сервиса `db-check`:
+```bash
+docker compose up --build -d
+```
+Проверить статус контейнеров:
+```bash
+docker compose ps
+```
+Контейнер `db` должен перейти в состояние `healthy`, а одноразовый сервис `db-check` завершиться со статусом `Exited (0)`.
+
+### 4. Импорт структуры и данных базы данных
+Скопировать файл скрипта в контейнер СУБД и применить его:
+```bash
+docker compose cp database/shoe_store.sql db:/tmp/shoe_store.sql
+docker compose exec db psql -v ON_ERROR_STOP=1 -U shoe_user -d shoe_store -f /tmp/shoe_store.sql
+```
+
+### 5. Проверка состояния базы данных
+Проверить количество созданных таблиц через встроенный диагностический сервис:
+```bash
+docker compose run --rm db-check
+```
+Ожидаемый результат: `OK: база=shoe_store; таблиц=5`.
+
+### 6. Подключение десктопного приложения
+В локальном файле `config.ini` указать параметры соединения с контейнерной базой данных:
+```ini
+[database]
+host = 127.0.0.1
+port = 5433
+name = shoe_store
+user = shoe_user
+password = your_secure_password
+```
+Запустить десктопное приложение:
+```bash
+python main.py
+```
+
+### 7. Остановка и повторный запуск инфраструктуры
+Для временной остановки контейнеров с сохранением состояния:
+```bash
+docker compose stop
+```
+Для возобновления работы:
+```bash
+docker compose start
+```
+
 ## Структура репозитория
 - `app/` - модули приложения (интерфейс, логика каталога, управление заказами)
+- `docker/db-check/` - вспомогательный сервис проверки доступности СУБД (Dockerfile, скрипт check_db.py, requirements.txt)
 - `resources/` - графические ресурсы, иконки, логотип и таблицы импорта
-- `database/` - скрипт базы данных PostgreSQL (shoe_shop.sql) и скрипты импорта
+- `database/` - скрипты базы данных PostgreSQL (shoe_shop.sql, shoe_store.sql)
 - `docs/` - архитектурная документация и ER-диаграмма
+- `compose.yaml` - спецификация многоконтейнерного запуска Docker Compose
+- `.env.example` - шаблон переменных окружения для СУБД
+- `.dockerignore` - правила исключения файлов из контекста сборки Docker
 - `config.ini.example` - шаблон конфигурации подключения к базе данных
 - `requirements.txt` - перечень зависимостей Python
 

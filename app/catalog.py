@@ -27,7 +27,13 @@ import configparser
 
 def get_db_connection():
     config = configparser.ConfigParser()
-    config_file = "config.ini"`n    if not os.path.exists(config_file):`n        print("Предупреждение: файл config.ini не найден, используются параметры по умолчанию")
+    config_file = "config.ini"
+    if not os.path.exists(config_file):
+        cand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.ini")
+        if os.path.exists(cand):
+            config_file = cand
+        else:
+            print("Предупреждение: файл config.ini не найден, используются параметры по умолчанию")
     if os.path.exists(config_file):
         config.read(config_file, encoding="utf-8")
         if "database" in config:
