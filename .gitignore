@@ -20,6 +20,9 @@ ENV/
 build/
 dist/
 *.egg-info/
+ShoeStore-release/
+ShoeStore-Test/
+*.zip
 
 # Локальные настройки и секреты
 config.ini

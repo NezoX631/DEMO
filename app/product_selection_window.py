@@ -5,6 +5,10 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont, QIcon
 import psycopg
+try:
+    from paths import get_resource_path
+except ImportError:
+    from app.paths import get_resource_path
 
 
 class ProductSelectionWindow(QDialog):
@@ -16,7 +20,7 @@ class ProductSelectionWindow(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Выбор товаров для заказа")
         self.setMinimumSize(900, 700)
-        self.setWindowIcon(QIcon("import/Icon.png") if parent else None)
+        self.setWindowIcon(QIcon(get_resource_path("import/Icon.png")) if parent else None)
 
         self.selected_items = []  # [(item_number, name, quantity), ...]
         self.products_data = []  # Кэш данных товаров

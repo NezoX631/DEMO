@@ -22,18 +22,18 @@ from managerCatalog import Ui_ManagerCatalogWindow
 from productEditWindow import Ui_ProductEditWindow
 from orderEditWindow import Ui_OrderEditWindow
 from product_selection_window import ProductSelectionWindow
+try:
+    from paths import get_config_path, get_resource_path
+except ImportError:
+    from app.paths import get_config_path, get_resource_path
 
 import configparser
 
 def get_db_connection():
     config = configparser.ConfigParser()
-    config_file = "config.ini"
+    config_file = get_config_path()
     if not os.path.exists(config_file):
-        cand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.ini")
-        if os.path.exists(cand):
-            config_file = cand
-        else:
-            print("Предупреждение: файл config.ini не найден, используются параметры по умолчанию")
+        print("Предупреждение: файл config.ini не найден, используются параметры по умолчанию")
     if os.path.exists(config_file):
         config.read(config_file, encoding="utf-8")
         if "database" in config:
@@ -75,7 +75,7 @@ class ProductEditWindow(QWidget):
 
         title = "Добавление товара" if mode == 'add' else "Редактирование товара"
         self.setWindowTitle(title)
-        self.setWindowIcon(QIcon("import/Icon.png"))
+        self.setWindowIcon(QIcon(get_resource_path("import/Icon.png")))
         self.setMinimumSize(550, 700)
 
         self.ui.headerLabel.setText(title)
@@ -111,7 +111,7 @@ class ProductEditWindow(QWidget):
 
     def set_default_image(self):
         try:
-            default_pixmap = QPixmap("import/picture.png")
+            default_pixmap = QPixmap(get_resource_path("import/picture.png"))
             if not default_pixmap.isNull():
                 scaled_pixmap = default_pixmap.scaled(
                     300, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation
@@ -227,7 +227,7 @@ class ProductEditWindow(QWidget):
 
                 if self.original_image_path and self.original_image_path != 'picture.png':
                     try:
-                        photo_path = os.path.join("import", self.original_image_path)
+                        photo_path = get_resource_path(os.path.join("import", self.original_image_path))
                         if os.path.exists(photo_path):
                             product_pixmap = QPixmap(photo_path)
                             if not product_pixmap.isNull():
@@ -556,7 +556,7 @@ class OrderEditWindow(QWidget):
 
         title = "Добавление заказа" if mode == 'add' else "Редактирование заказа"
         self.setWindowTitle(title)
-        self.setWindowIcon(QIcon("import/Icon.png"))
+        self.setWindowIcon(QIcon(get_resource_path("import/Icon.png")))
         self.setMinimumSize(650, 500)  # Увеличили размер для новой кнопки
 
         self.ui.headerLabel.setText(title)
@@ -1329,7 +1329,7 @@ class GuestCatalogWindow(QWidget):
 
     def setup_logo(self):
         try:
-            logo_pixmap = QPixmap("import/Icon.png")
+            logo_pixmap = QPixmap(get_resource_path("import/Icon.png"))
             if not logo_pixmap.isNull():
 
                 self.ui.logoLabel.setPixmap(logo_pixmap.scaled(60, 60, Qt.KeepAspectRatio))
@@ -1389,7 +1389,7 @@ class GuestCatalogWindow(QWidget):
         photo_label.setMinimumSize(120, 120)
         photo_label.setMaximumSize(120, 120)
         photo_label.setAlignment(Qt.AlignCenter)
-        product_pixmap = QPixmap("import/{}".format(image_path))
+        product_pixmap = QPixmap(get_resource_path(f"import/{image_path}"))
         scaled_pixmap = product_pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         photo_label.setPixmap(scaled_pixmap)
@@ -1630,7 +1630,7 @@ class ClientCatalogWindow(QWidget):
 
     def setup_logo(self):
         try:
-            logo_pixmap = QPixmap("import/Icon.png")
+            logo_pixmap = QPixmap(get_resource_path("import/Icon.png"))
             if not logo_pixmap.isNull():
 
                 self.ui.logoLabel.setPixmap(logo_pixmap.scaled(60, 60, Qt.KeepAspectRatio))
@@ -1690,7 +1690,7 @@ class ClientCatalogWindow(QWidget):
         photo_label.setMinimumSize(120, 120)
         photo_label.setMaximumSize(120, 120)
         photo_label.setAlignment(Qt.AlignCenter)
-        product_pixmap = QPixmap("import/{}".format(image_path))
+        product_pixmap = QPixmap(get_resource_path(f"import/{image_path}"))
         scaled_pixmap = product_pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         photo_label.setPixmap(scaled_pixmap)
@@ -1933,7 +1933,7 @@ class ManagerCatalogWindow(QWidget):
 
     def setup_logo(self):
         try:
-            logo_pixmap = QPixmap("import/Icon.png")
+            logo_pixmap = QPixmap(get_resource_path("import/Icon.png"))
             if not logo_pixmap.isNull():
 
                 scaled_pixmap = logo_pixmap.scaled(60, 60, Qt.KeepAspectRatio)
@@ -2055,7 +2055,7 @@ class ManagerCatalogWindow(QWidget):
         photo_label.setMinimumSize(120, 120)
         photo_label.setMaximumSize(120, 120)
         photo_label.setAlignment(Qt.AlignCenter)
-        product_pixmap = QPixmap("import/{}".format(image_path))
+        product_pixmap = QPixmap(get_resource_path(f"import/{image_path}"))
         scaled_pixmap = product_pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         photo_label.setPixmap(scaled_pixmap)
@@ -2426,7 +2426,7 @@ class AdminCatalogWindow(QWidget):
 
     def setup_logo(self):
         try:
-            logo_pixmap = QPixmap("import/Icon.png")
+            logo_pixmap = QPixmap(get_resource_path("import/Icon.png"))
             if not logo_pixmap.isNull():
 
                 scaled_pixmap = logo_pixmap.scaled(60, 60, Qt.KeepAspectRatio)
@@ -2552,7 +2552,7 @@ class AdminCatalogWindow(QWidget):
         photo_label.setMaximumSize(120, 120)
         photo_label.setAlignment(Qt.AlignCenter)
         try:
-            product_pixmap = QPixmap("import/{}".format(image_path))
+            product_pixmap = QPixmap(get_resource_path(f"import/{image_path}"))
             scaled_pixmap = product_pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             photo_label.setPixmap(scaled_pixmap)
             photo_label.setFixedSize(scaled_pixmap.size())
@@ -2978,7 +2978,7 @@ class AdminCatalogWindow(QWidget):
             conn.close()
 
             if photo_to_delete and photo_to_delete.lower() != 'picture.png':
-                photo_path = os.path.join("import", str(photo_to_delete))
+                photo_path = get_resource_path(os.path.join("import", str(photo_to_delete)))
                 if os.path.exists(photo_path) and os.path.isfile(photo_path):
                     try:
                         os.remove(photo_path)
@@ -3031,11 +3031,11 @@ class MainWindow(QMainWindow):
     def show_login(self):
         self.stacked_widget.setCurrentWidget(self.login_window)
         self.setWindowTitle("Авторизация")
-        self.setWindowIcon(QIcon("import/Icon.png"))
+        self.setWindowIcon(QIcon(get_resource_path("import/Icon.png")))
 
     def show_catalog(self, user_type, full_name):
         self.setWindowTitle("Магазин обуви - Каталог товаров компании Чудо Обувь")
-        self.setWindowIcon(QIcon("import/Icon.png"))
+        self.setWindowIcon(QIcon(get_resource_path("import/Icon.png")))
         if user_type == "guest":
             self.stacked_widget.setCurrentWidget(self.guest_window)
         elif user_type == "client":

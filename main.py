@@ -12,7 +12,10 @@ app_dir = os.path.join(current_dir, 'app')
 if app_dir not in sys.path:
     sys.path.insert(0, app_dir)
 
-from catalog import main
+try:
+    from catalog import main
+except ImportError:
+    from app.catalog import main
 
 if __name__ == "__main__":
     main()
