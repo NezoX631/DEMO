@@ -40,7 +40,8 @@ def get_db_connection():
         "dbname": "shoe_shop",
         "port": "5432",
         "user": "postgres",
-        "password": "123"
+        "password": "123",
+        "connect_timeout": 3
     }
     if os.path.exists(config_file):
         config.read(config_file, encoding="utf-8")
@@ -51,7 +52,8 @@ def get_db_connection():
                 "port": db.get("port", "5432"),
                 "dbname": db.get("name", "shoe_shop"),
                 "user": db.get("user", "postgres"),
-                "password": db.get("password", "123")
+                "password": db.get("password", "123"),
+                "connect_timeout": 3
             }
     
     last_err = None
