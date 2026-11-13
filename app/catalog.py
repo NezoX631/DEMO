@@ -30,28 +30,42 @@ except ImportError:
 import configparser
 
 def get_db_connection():
+    import time
     config = configparser.ConfigParser()
     config_file = get_config_path()
     if not os.path.exists(config_file):
         print("Предупреждение: файл config.ini не найден, используются параметры по умолчанию")
+    params = {
+        "host": "localhost",
+        "dbname": "shoe_shop",
+        "port": "5432",
+        "user": "postgres",
+        "password": "123"
+    }
     if os.path.exists(config_file):
         config.read(config_file, encoding="utf-8")
         if "database" in config:
             db = config["database"]
-            return psycopg.connect(
-                host=db.get("host", "localhost"),
-                port=db.get("port", "5432"),
-                dbname=db.get("name", "shoe_shop"),
-                user=db.get("user", "postgres"),
-                password=db.get("password", "123")
-            )
-    return psycopg.connect(
-        host="localhost",
-        dbname="shoe_shop",
-        port="5432",
-        user="postgres",
-        password="123"
-    )
+            params = {
+                "host": db.get("host", "localhost"),
+                "port": db.get("port", "5432"),
+                "dbname": db.get("name", "shoe_shop"),
+                "user": db.get("user", "postgres"),
+                "password": db.get("password", "123")
+            }
+    
+    last_err = None
+    for attempt in range(4):
+        try:
+            return psycopg.connect(**params)
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            if "10048" in err_str or "already in use" in err_str:
+                time.sleep(0.15 * (attempt + 1))
+                continue
+            raise
+    raise last_err
 
 if sys.platform == "win32":
     QApplication.setStyle("Windows")
@@ -1277,7 +1291,6 @@ class GuestCatalogWindow(QWidget):
         self.ui.setupUi(self)
 
         self.init_ui()
-        self.load_products()
 
     def init_ui(self):
         self.setup_fonts()
@@ -1575,7 +1588,6 @@ class ClientCatalogWindow(QWidget):
         """)
 
         self.init_ui()
-        self.load_products()
 
     def set_full_name(self, full_name):
         self.ui.userInfoLabel.setText(full_name)
@@ -1878,8 +1890,6 @@ class ManagerCatalogWindow(QWidget):
         """)
 
         self.init_ui()
-        self.load_products()
-        self.load_orders()
 
     def set_full_name(self, full_name):
         self.ui.userInfoLabel.setText(full_name)
@@ -2366,8 +2376,6 @@ class AdminCatalogWindow(QWidget):
         """)
 
         self.init_ui()
-        self.load_products()
-        self.load_orders()
 
     def set_full_name(self, full_name):
         self.ui.userInfoLabel.setText(full_name)
@@ -3037,15 +3045,21 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Магазин обуви - Каталог товаров компании Чудо Обувь")
         self.setWindowIcon(QIcon(get_resource_path("import/Icon.png")))
         if user_type == "guest":
+            self.guest_window.load_products()
             self.stacked_widget.setCurrentWidget(self.guest_window)
         elif user_type == "client":
             self.client_window.set_full_name(full_name)
+            self.client_window.load_products()
             self.stacked_widget.setCurrentWidget(self.client_window)
         elif user_type == "manager":
             self.manager_window.set_full_name(full_name)
+            self.manager_window.load_products()
+            self.manager_window.load_orders()
             self.stacked_widget.setCurrentWidget(self.manager_window)
         elif user_type == "admin":
             self.admin_window.set_full_name(full_name)
+            self.admin_window.load_products()
+            self.admin_window.load_orders()
             self.stacked_widget.setCurrentWidget(self.admin_window)
         else:
             print(f"Неизвестный тип пользователя: {user_type}")
